@@ -1,0 +1,12 @@
+.gradBackground {
+background: #fceabb;
+background: -moz-linear-gradient(top,  #fceabb 0%, #fccd4d 45%, #f8b500 97%, #fbdf93 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fceabb), color-stop(45%,#fccd4d), color-stop(97%,#f8b500), color-stop(100%,#fbdf93));
+background: -webkit-linear-gradient(top,  #fceabb 0%,#fccd4d 45%,#f8b500 97%,#fbdf93 100%);
+background: -o-linear-gradient(top,  #fceabb 0%,#fccd4d 45%,#f8b500 97%,#fbdf93 100%);
+background: linear-gradient(to bottom,  #fceabb 0%,#fccd4d 45%,#f8b500 97%,#fbdf93 100%);
+	
+
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+}

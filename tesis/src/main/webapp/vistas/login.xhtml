@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<link rel="stylesheet" type="text/css" href="css/estilos.css" />
+	<style>
+		.transparentBackground tr,.transparentBackground td { background: transparent !important; border: none !important;}
+	</style>
+</h:head>
+<h:body styleClass="gradBackground" style="height:530px;">
+	
+	<div >
+		<h:form id="form">
+ 			<p:growl id="growl" autoUpdate="true" />
+			
+				<p:fieldset legend="Login" style="margin:auto;width:140px;height:370px;
+									margin-top:100px;" >
+					<p:fragment>
+						<p:commandButton value="Registro"  style="float:right;font-size:12px;" actionListener="#{loginView.limpiarUsuario}"
+							oncomplete="PF('dlgRegistro').show();" update=":formDlg:pnlDlg" process="@this" />
+					</p:fragment>
+					<br />
+					<p:panelGrid id="pnlLogin" columns="1" style="margin-top:40px;" styleClass="transparentBackground">
+						<p:outputLabel value="Usuario " for="inputuser"/> 
+						<p:inputText id="inputuser" value="#{loginView.usuario}" required="true" 
+									requiredMessage="El usuario es requerido" />
+						<p:outputLabel  value="Password " for="inputpassw"/>
+						<p:password id="inputpassw" value="#{loginView.password}" required="true" 
+									requiredMessage="La constraseña es requerida"/>							
+					</p:panelGrid>
+					<div style="margin:40px auto;width: 70%;">
+						<p:commandButton id="btnLogin" value="Entrar" style="width:100%;"
+							action="#{loginView.login}" onclick="PF('statusDialog').show();" 
+							oncomplete="if (args.validationFailed) PF('statusDialog').hide();"/>
+					</div>
+					<p:defaultCommand target="btnLogin" />
+				</p:fieldset>
+				
+		</h:form>
+	</div>
+		
+		<p:dialog id="dlgRegistro" widgetVar="dlgRegistro" closable="true" closeOnEscape="true"
+					dynamic="true" modal="true" showEffect="drop" hideEffect="drop" header="Registro"
+					position="center" height="450" resizable="false">
+			<br />	
+			<h:form id="formDlg">	
+				<p:panelGrid id="pnlDlg" columns="2" styleClass="transparentBackground" >
+					<p:outputLabel value="Nombre" for="inputNombre"/>
+					<p:inputText id="inputNombre" value="#{loginView.usuarioRegistro.nombre}" required="true"
+						requiredMessage="El nombre es obligatorio" style="width:170px;"/>
+					<p:outputLabel  value="A. Paterno" for="inputApaterno"/>
+					<p:inputText id="inputApaterno" value="#{loginView.usuarioRegistro.APaterno}" required="true"
+						requiredMessage="El apellido paterno es obligatorio" style="width:170px;"/>
+					<p:outputLabel value="A. Materno" for="inputAmaterno"/>
+					<p:inputText id="inputAmaterno" value="#{loginView.usuarioRegistro.AMaterno}" style="width:170px;"/>
+					<p:outputLabel  value="Teléfono" for="inputtelef" />
+					<p:inputMask id="inputtelef" value="#{loginView.telefono}" required="true" style="width:170px;"
+							requiredMessage="El número telefónico es obligatorio" mask="(999) 999-9999" />
+					<p:outputLabel value="Usuario" for="inputuser"/>
+					<p:inputText id="inputuser" value="#{loginView.usuarioRegistro.usuario}" required="true" style="width:170px;"
+							requiredMessage="El usuario es obligatorio"/>
+					<p:outputLabel value="Password" for="pswd1"/>
+					<p:password id="pswd1" match="pswd2" feedback="true" weakLabel="Débil" required="true" style="width:170px;"
+						validatorMessage="Las constraseñas no coinciden"
+						goodLabel="Regular" strongLabel="Fuerte" promptLabel="Escriba su password" 
+						value="#{loginView.usuarioRegistro.password}" requiredMessage="La contraseña es obligatoria"/>
+					<p:outputLabel value="Confirmar" for="pswd2"/>
+					<p:password id="pswd2" value="#{loginView.passwordConfirm}" required="true" style="width:170px;"
+							requiredMessage="La confirmación de contraseña es obligatoria"/>
+				</p:panelGrid>
+				<br /><br />
+				<p:commandButton value="Registrarse" style="margin-left:50px;width:70%"
+						action="#{loginView.registrarUsuario}" update="pnlDlg, :form:pnlLogin" 
+						oncomplete="if (args.guardado &amp;&amp; !args.validationFailed) PF('dlgRegistro').hide();"/>
+				
+			</h:form>
+		</p:dialog>
+		<p:dialog widgetVar="statusDialog" modal="true" draggable="false" 
+							closable="false" resizable="false" showHeader="false" >
+					<p:graphicImage value="imagenes/loading/ajax_loader_orange_256.gif" />
+					<br /><br />
+					<div style="margin:auto;width:110px;">
+					<p:outputLabel value="CARGANDO..." style="font-weight:bold; font-size:20px;"/>
+					</div>
+		</p:dialog>
+		
+</h:body>
+</html>

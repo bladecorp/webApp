@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<link rel="stylesheet" type="text/css" href="../css/estilos.css" />
+	<style>
+.cmStyle.ui-panelgrid>*>tr,
+.cmStyle.ui-panelgrid>*>tr>td {
+    border: none;
+    background: transparent !important;
+}
+/* .cmStyle tr, .cmStyle td{ */
+/*    	background: transparent !important;    */
+/* 	border: none !important; */
+/*  	border: transparent !important;  */
+/* } */
+.transparentBackground tr, .transparentBackground td {
+	background: transparent !important;
+	border: none !important;
+}
+
+.ui-inplace .ui-inputfield {
+	width: 150px;
+}
+
+.menu .ui-selectonemenu-label {
+	text-align: center;
+}
+
+.panel .ui-selectonemenu-list {
+	text-align: center;
+}
+
+.panelPers .ui-panel-content {
+	padding: 0.2em
+}
+.resaltarFila {
+   background: #efefef;
+      font-weight: bold;
+}
+
+</style>
+</h:head>
+<h:body styleClass="gradBackground" style="height:620px;">
+	<div>
+		<h:form id="form">
+			<p:growl id="growl" autoUpdate="true" />
+
+			<div
+				style="width: 80%; height: 100px; margin: auto; margin-top: 5px;">
+				<p:panel header="ADMINISTRACIÓN DEL SISTEMA"
+					style="text-align:center;">Usuario en Sesión: 
+						<p:outputLabel value=" #{inicioView.usuario.usuario}"
+						style="font-weight:bold;font-size:24px;color:#8d8574;margin-left:10px;" />
+				</p:panel>
+			</div>
+
+			<div
+				style="width: 95%; height: 235px; margin: auto; margin-top: 5px;">
+				<p:panelGrid id="pnlVehiculos" columns="1" styleClass="cmStyle" >
+				<p:row id="fila1"><p:column id="columna1" styleClass="noHay">
+					<p:contextMenu for="dtVehiculos" >
+						<p:menuitem value="Editar" update=":formAgregar:pnlAgregarVeh"
+							icon="ui-icon-pencil"
+							actionListener="#{inicioView.editarVehiculo}"
+							onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();PF('dlgAgregarVeh').show();" />
+						<p:menuitem value="Revisar Sensores" icon="ui-icon-signal-diag"
+							onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();PF('dlgRevisionSen').show();"
+							update=":formRev:pnlRevision" />
+						<p:menuitem value="Cambiar Status"
+							update=":dlgStatus, :formStatus, :formStatus:pnlStatus"
+							icon="ui-icon-gear" onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();PF('dlgStatus').show();" />
+						<p:menuitem value="Eliminar" update=":formEliminarVeh:pnlEliminarVeh"
+							icon="ui-icon-close" onclick="PF('dlgEliminarVeh').show();" />
+						<p:menuitem value="Historial" update=":dlgHistorico, :formHist:pnlHistorico"
+							icon="ui-icon-note" onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();PF('dlgHistorico').show();" />
+					</p:contextMenu>
+					</p:column></p:row>
+					<p:row><p:column>
+					<p:dataTable id="dtVehiculos" 
+						emptyMessage="No hay vehículos registrados"
+						value="#{inicioView.vehiculos}" var="veh" rows="3"
+						paginator="true" paginatorPosition="bottom" rowKey="#{veh.id}"
+						selection="#{inicioView.vehiculoDTO}" selectionMode="single" 
+						paginatorAlwaysVisible="false">
+						<p:ajax event="rowSelect"
+							listener="#{inicioView.obtenerDestinatariosPorVehiculo}"
+							update=":form:pnlDestinatarios"
+							onstart="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();" />
+						<f:facet name="header">Vehículos Registrados
+								<p:commandButton value="Agregar"
+								style="float:right;font-size:12px;"
+								update=" :formAgregar:pnlAgregarVeh"
+								onclick="PF('statusDialog').show();"
+								actionListener="#{inicioView.limpiarVehiculo}"
+								oncomplete="PF('statusDialog').hide();PF('dlgAgregarVeh').show();" />
+						</f:facet>
+						<p:column headerText="" width="40">
+							<!-- 								<p:outputLabel value="../imagenes/vw.png" style="font-size:14px;" /> -->
+							<p:graphicImage
+								value="../imagenes/marcas/#{veh.marca.nombre}.png" width="30"
+								height="30" />
+						</p:column>
+						<p:column headerText="Marca"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{veh.marca.nombre}"
+								style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="Modelo"
+							style="text-align:center;font-size:14px;" width="200">
+							<p:outputLabel value="#{veh.modelo.nombre}"
+								style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="Placas"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{veh.placas}" style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="Teléfono"
+							style="text-align:center;font-size:14px;">
+							<h:outputText value="#{veh.telefono}" style="font-size:14px;" converter="telConverter"/>
+						</p:column>
+						<p:column headerText="Tipo"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{veh.tipo.tipo}" style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="Llave"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{veh.llaves[0].codigo}"
+								style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="Llave Inv"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{veh.llaves[1].codigo}"
+								style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="Status"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel rendered="#{veh.status.id == 1}"
+								value="#{veh.status.tipo}" style="font-size:14px; color:green;font-weight:bold;" />
+							<p:outputLabel rendered="#{veh.status.id == 2}"
+								value="#{veh.status.tipo}" style="font-size:14px; color: firebrick;font-weight:bold;" />
+						</p:column>
+					</p:dataTable>
+					</p:column></p:row>
+				</p:panelGrid>
+			</div>
+
+			<div
+				style="width: 25%; display: block; overflow: auto; float: left; margin-left: 2em;">
+				<p:panel id="pnl_personales" styleClass="panelPers">
+					<p:panelGrid id="pnlPersonales"
+						style="width:100%;font-size:17px;margin:0;padding:0;">
+						<f:facet name="header">
+							<p:row>
+								<p:column colspan="2">Datos Personales</p:column>
+							</p:row>
+						</f:facet>
+						<p:row>
+							<p:column style="width:90px;">
+								<p:outputLabel value="Nombre: " />
+							</p:column>
+							<p:column style="text-align:center;">
+								<p:outputLabel value="#{inicioView.usuario.nombre}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<p:outputLabel value="A. Paterno: " />
+							</p:column>
+							<p:column style="text-align:center;">
+								<p:outputLabel value="#{inicioView.usuario.APaterno}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<p:outputLabel value="A. Materno: " />
+							</p:column>
+							<p:column style="text-align:center;">
+								<p:outputLabel value="#{inicioView.usuario.AMaterno}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<p:outputLabel value="Teléfono: " />
+							</p:column>
+							<p:column style="text-align:center;">
+								<p:selectOneMenu id="somTel" converter="telConverter">
+									<f:selectItems value="#{inicioView.telefonos}" var="tel"
+										itemLabel="#{tel.telefono}" itemValue="#{tel}"/>
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<br />
+					<div style="width: 50%; margin: auto;">
+						<p:commandButton value="Editar" style="width:100%"
+							onclick="PF('statusDialog').show();"
+							update=":formPers:pnlEditarPers"
+							actionListener="#{inicioView.prepararUsuarioAuxiliar}"
+							oncomplete="PF('statusDialog').hide();PF('dlgPersonales').show();" />
+					</div>
+				</p:panel>
+			</div>
+
+			<div style="width: 69.4%; float: left; margin-left: 10px;margin-top: -10px;">
+				<p:panelGrid id="pnlDestinatarios" columns="1" styleClass="cmStyle">
+					<p:contextMenu for="dtDestinatarios">
+						<p:menuitem value="Enviar Invitación" icon="ui-icon-mail-closed"
+							onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();PF('dlgInvitacion').show();"
+							update=":dlgInvitacion, :formInv:pnlInvitacion" />
+						<p:menuitem value="Editar" icon="ui-icon-pencil"
+							update=":dlgAgregarDest, :formDest:pnlAgregarDest"
+							onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();PF('dlgAgregarDest').show();" />
+						<p:menuitem value="Eliminar" icon="ui-icon-close"
+							update="pnlDestinatarios" onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();"
+							action="#{inicioView.eliminarDestinatario}" />
+					</p:contextMenu>
+					<p:dataTable id="dtDestinatarios"
+						emptyMessage="No hay destinatarios registrados para este vehículo"
+						value="#{inicioView.destinatarios}" var="dest" rows="5"
+						paginator="true" paginatorPosition="bottom" rowKey="#{dest.id}"
+						selection="#{inicioView.destinatario}" selectionMode="single"
+						paginatorAlwaysVisible="false">
+
+						<f:facet name="header">Destinatarios para 
+									<p:outputLabel
+								value="#{inicioView.vehiculoDTO.marca.nombre} #{inicioView.vehiculoDTO.modelo.nombre}"
+								style="color:yellow;" />
+							<p:commandButton value="Agregar"
+								style="float:right;font-size:12px;"
+								onclick="PF('statusDialog').show();"
+								actionListener="#{inicioView.limpiarDestinatario}"
+								update=":dlgAgregarDest,:formDest:pnlAgregarDest"
+								disabled="#{empty inicioView.vehiculoDTO.marca.nombre}"
+								oncomplete="PF('statusDialog').hide();PF('dlgAgregarDest').show();" />
+						</f:facet>
+						<p:column headerText="Nombre"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{dest.nombre}" style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="A. Paterno"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{dest.APaterno}" style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="A. Materno"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel value="#{dest.AMaterno}" style="font-size:14px;" />
+						</p:column>
+						<p:column headerText="Teléfono"
+							style="text-align:center;font-size:14px;">
+							<h:outputText value="#{dest.telefono}" style="font-size:14px;" converter="telConverter"/>
+						</p:column>
+						<p:column headerText="Invitación"
+							style="text-align:center;font-size:14px;">
+							<p:outputLabel rendered="#{dest.statusInvitacion eq 1}"
+								value="Enviada" style="font-size:14px;color: navy;font-weight:bold;" />
+							<p:outputLabel rendered="#{dest.statusInvitacion eq 2}"
+								value="No Enviada" style="font-size:14px;color: goldenrod;font-weight:bold;" />
+							<p:outputLabel rendered="#{dest.statusInvitacion eq 3}"
+								value="Aceptada" style="font-size:14px;color: green;font-weight:bold;" />
+							<p:outputLabel rendered="#{dest.statusInvitacion eq 4}"
+								value="Rechazada" style="font-size:14px;color: firebrick;font-weight:bold;" />
+						</p:column>
+
+					</p:dataTable>
+				</p:panelGrid>
+			</div>
+		</h:form>
+
+		<p:dialog id="dlgAgregarVeh" widgetVar="dlgAgregarVeh" modal="true"
+			closeOnEscape="true" resizable="false" dynamic="true"
+			header="Vehículo" showEffect="drop" hideEffect="drop"
+			onHide="#{inicioView.limpiarValidacion()}">
+			<h:form id="formAgregar">
+				<p:panelGrid id="pnlAgregarVeh" columns="2"
+					styleClass="transparentBackground">
+					<f:facet name="header">
+						<p:graphicImage value="/imagenes/marcas/#{inicioView.marcas[inicioView.vehiculoDTO.marca.id -1].nombre}.png"
+						height="100" width="150" id="imagenAg" style="margin-botom:25px;"/>
+					</f:facet>
+					
+					<p:outputLabel for="smMarca" value="Marca"/>
+					<p:selectOneMenu id="smMarca"
+						value="#{inicioView.vehiculoDTO.marca.id}" required="true"
+						styleClass="menu" style="width:255px;">
+						<f:selectItems value="#{inicioView.marcas}" var="marca"
+							itemLabel="#{marca.nombre}" itemValue="#{marca.id}" />
+						<p:ajax event="change" listener="#{inicioView.onCambioMarca}"
+							update="pnlAgregarVeh" oncomplete="PF('statusDialog').hide();"
+							onerror="PF('statusDialog').hide();"
+							onstart="PF('statusDialog').show();" />
+					</p:selectOneMenu>
+					<p:outputLabel for="smModelo" value="Modelo" />
+					<p:selectOneMenu id="smModelo"
+						value="#{inicioView.vehiculoDTO.modelo.id}" required="true"
+						style="width:255px;" styleClass="menu" panelStyleClass="panel">
+						<f:selectItems value="#{inicioView.modelos}" var="modelo"
+							itemLabel="#{modelo.nombre}" itemValue="#{modelo.id}" />
+						<p:ajax event="change" listener="#{inicioView.onCambioModelo}" />
+					</p:selectOneMenu>
+					<p:outputLabel for="itPlacas" value="Placas" />
+					<p:inputText id="itPlacas" value="#{inicioView.vehiculoDTO.placas}"
+						style="width:245px;text-align:center;" required="true"
+						requiredMessage="Debe indicar las placas" />
+					<p:outputLabel for="itTelefono" value="Teléfono" />
+					<p:inputMask id="itTelefono" mask="(999) 999-9999" 
+						value="#{inicioView.vehiculoDTO.telefono}"
+						style="width:245px;text-align:center;" required="true"
+						requiredMessage="Debe indicar el teléfono del vehículo" />
+					<p:outputLabel for="soVehiculo" value="Tipo" />
+					<p:selectOneButton id="soVehiculo"
+						value="#{inicioView.vehiculoDTO.tipo.id}" required="true"
+						requiredMessage="Debe elegir un tipo de vehículo"
+						style="font-size:18px;">
+						<f:selectItems value="#{inicioView.tiposVehiculos}" var="tipos"
+							itemValue="#{tipos.id}" itemLabel="#{tipos.tipo}" />
+					</p:selectOneButton>
+					<p:outputLabel for="itLlave" value="Llave Vehículo"
+						style="width:150px;" />
+					<p:inputText id="itLlave"
+						value="#{inicioView.vehiculoDTO.llaves[0].codigo}"
+						style="width:245px;text-align:center;" required="true"
+						requiredMessage="Debe indicar la llave del vehículo" />
+					<p:outputLabel for="itLlaveInv" value="Llave Invitación"
+						style="width:150px;" />
+					<p:inputText id="itLlaveInv"
+						value="#{inicioView.vehiculoDTO.llaves[1].codigo}"
+						style="width:245px;text-align:center;" required="true"
+						requiredMessage="Debe indicar la llave de invitación" />
+				</p:panelGrid>
+				<br />
+				<div style="width: 70%; height: 45px; margin: 30px auto;">
+					<p:commandButton value="Guardar" style="width:100%;margin:auto;"
+						action="#{inicioView.guardarVehiculo}"
+						update="pnlAgregarVeh, :form:dtVehiculos"
+						onclick="PF('statusDialog').show();"
+						oncomplete="PF('statusDialog').hide();if (args.guardado &amp;&amp; !args.validationFailed)PF('dlgAgregarVeh').hide();">
+						<p:resetInput target="pnlAgregarVeh" />
+					</p:commandButton>
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog id="dlgStatus" widgetVar="dlgStatus" modal="true"
+			closeOnEscape="true" resizable="false" dynamic="true"
+			header="Cambiar Status de #{inicioView.vehiculoDTO.marca.nombre} #{inicioView.vehiculoDTO.modelo.nombre}"
+			showEffect="blind" hideEffect="clip">
+			<h:form id="formStatus">
+				<p:panel id="pnlStatus">
+					<div align="center">
+						<p:outputLabel value="El status actual del equipo es: " />
+						<p:outputLabel rendered="#{inicioView.vehiculoDTO.status.id eq 2}"
+							value="#{inicioView.vehiculoDTO.status.tipo}"
+							style="color:red;" />
+						<p:outputLabel rendered="#{inicioView.vehiculoDTO.status.id eq 1}"
+							value="#{inicioView.vehiculoDTO.status.tipo}"
+							style="color:green;" />
+						<br />
+						<br />
+						<div align="left" style="font-style: italic; font-size: 14px;">
+							<p:outputLabel value="ACTIVADO: " style="color:green;font-weight:bold;" />
+							<p:outputLabel
+								value="Las alarmas serán reenviadas al titular y a los destinatarios de forma normal" />
+							<br />
+							<p:outputLabel value="DESACTIVADO: " style="color:red;font-weight:bold;" />
+							<p:outputLabel
+								value="Las alarmas serán recibidas por el servicio web, pero no serán reenviadas
+													al titular ni a los destinatarios" />
+						</div>
+						<br />
+						<br />
+						<p:outputLabel value="¿Desea cambiarlo?" />
+						<br />
+						<br />
+						<p:commandButton id="btnA"
+							rendered="#{inicioView.vehiculoDTO.status.id eq 2}" style="width:200px;height:70px;"
+							value="Activar" action="#{inicioView.cambiarStatus}"
+							onclick="PF('statusDialog').show();"
+							oncomplete="PF('statusDialog').hide();PF('dlgStatus').hide();"
+							update=":form:dtVehiculos">
+							<f:setPropertyActionListener
+								target="#{inicioView.vehiculoDTO.status.id}" value="1" />
+						</p:commandButton>
+						<p:commandButton id="btnB"
+							rendered="#{inicioView.vehiculoDTO.status.id eq 1}" style="width:200px;height:70px;"
+							value="Desactivar" action="#{inicioView.cambiarStatus}"
+							oncomplete="PF('statusDialog').hide();PF('dlgStatus').hide();"
+							update=":form:dtVehiculos" onclick="PF('statusDialog').show();">
+							<f:setPropertyActionListener
+								target="#{inicioView.vehiculoDTO.status.id}" value="2" />
+						</p:commandButton>
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dlgAgregarDest" widgetVar="dlgAgregarDest" modal="true"
+			closeOnEscape="true" resizable="false" dynamic="true"
+			header="Destinatario" showEffect="drop" hideEffect="drop">
+			<h:form id="formDest">
+				<p:panelGrid id="pnlAgregarDest" columns="2"
+					styleClass="transparentBackground">
+					<f:facet name="header">
+						<p:outputLabel style="color:#8d8573;"
+							rendered="#{empty inicioView.destinatario.nombre}"
+							value="Agregar" />
+						<p:outputLabel style="color:#8d8573;"
+							rendered="#{not empty inicioView.destinatario.nombre}"
+							value="Editar" />
+						<p:outputLabel value=" Destinatario" style="color:#8d8573;" />
+					</f:facet>
+					<p:outputLabel for="itNomDest" value="Nombre" />
+					<p:inputText id="itNomDest"
+						value="#{inicioView.destinatario.nombre}" style="width:150px;"
+						required="true"
+						requiredMessage="Debe indicar el nombre del destinatario" />
+					<p:outputLabel for="itpaterno" value="A. Paterno"
+						style="width:150px;" />
+					<p:inputText id="itpaterno"
+						value="#{inicioView.destinatario.APaterno}" style="width:150px;"
+						required="true"
+						requiredMessage="Debe indicar el apellido paterno del destinatario" />
+					<p:outputLabel for="itmaterno" value="A. Materno"
+						style="width:150px;" />
+					<p:inputText id="itmaterno"
+						value="#{inicioView.destinatario.AMaterno}" style="width:150px;" />
+					<p:outputLabel for="itTeleDest" value="Teléfono" />
+					<p:inputMask id="itTeleDest" mask="(999) 999-9999" 
+						value="#{inicioView.destinatario.telefono}" style="width:150px;"
+						required="true"
+						requiredMessage="Debe indicar el teléfono del destinatario" />
+				</p:panelGrid>
+				<br />
+				<div style="width: 80%; height: 50px; margin: auto;">
+					<p:commandButton value="Guardar" style="width:100%"
+						action="#{inicioView.guardarDestinatario}"
+						update="pnlAgregarDest, :form:dtDestinatarios"
+						oncomplete="PF('statusDialog').hide();if (args.guardado &amp;&amp; !args.validationFailed)PF('dlgAgregarDest').hide();"
+						rendered="#{empty inicioView.destinatario.nombre}"
+						onclick="PF('statusDialog').show();" />
+					<p:commandButton value="Guardar Cambios" style="width:100%"
+						action="#{inicioView.actualizarDestinatario}"
+						update="pnlAgregarDest, :form:dtDestinatarios"
+						oncomplete="PF('statusDialog').hide();if (args.guardado &amp;&amp; !args.validationFailed)PF('dlgAgregarDest').hide();"
+						onclick="PF('statusDialog').show();"
+						rendered="#{not empty inicioView.destinatario.nombre}" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dlgPersonales" widgetVar="dlgPersonales" modal="true"
+			closeOnEscape="true" resizable="false" dynamic="true"
+			header="Editar Datos Personales" showEffect="drop" hideEffect="drop">
+			<h:form id="formPers">
+				<p:panelGrid id="pnlEditarPers" styleClass="transparentBackground">
+					<p:row>
+						<p:column>
+							<p:outputLabel for="it_Nombre" value="Nombre" />
+						</p:column>
+						<p:column colspan="2">
+							<p:inplace id="it_Nombre" editor="true">
+								<p:inputText value="#{inicioView.usuarioAuxiliar.nombre}"
+									required="true" requiredMessage="Debe escribir el nombre"/>
+							</p:inplace>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel for="it_Apaterno" value="A. Paterno" />
+						</p:column>
+						<p:column colspan="2">
+							<p:inplace id="it_Apaterno" editor="true">
+								<p:inputText value="#{inicioView.usuarioAuxiliar.APaterno}"
+									required="true" requiredMessage="Debe escribir el apellido paterno"/>
+							</p:inplace>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel for="it_Amaterno" value="A. Materno" />
+						</p:column>
+						<p:column colspan="2">
+							<p:inplace id="it_Amaterno" editor="true">
+								<p:inputText value="#{inicioView.usuarioAuxiliar.AMaterno}"
+									 />
+							</p:inplace>
+						</p:column>
+					</p:row>
+					<c:forEach items="#{inicioView.telefonosAux}" var="tel">
+						<p:row>
+							<p:column>
+								<p:outputLabel value="Teléfono" />
+							</p:column>
+							<p:column>
+								<p:inplace editor="true">
+									<p:inputMask value="#{tel.telefono}" required="true" requiredMessage="EL teléfono debe tener 10 dígitos"
+										placeholder="10 dígitos" mask="(999) 999-9999" />
+								</p:inplace>
+							</p:column>
+							<p:column>
+								<p:commandButton icon="ui-icon-trash"
+									style="margin-left:10px;width:30px;height:30px;"
+									action="#{inicioView.eliminarTelefono(tel)}"
+									update="pnlEditarPers" />
+							</p:column>
+						</p:row>
+					</c:forEach>
+				</p:panelGrid>
+				<div style="width: 50px; height: 40px; margin: 30px auto;">
+					<p:commandButton id="btnAgregarTelefono" icon="ui-icon-circle-plus"
+						action="#{inicioView.agregarTelefono}" update="pnlEditarPers"
+						onclick="PF('statusDialog').show();"
+						oncomplete="PF('statusDialog').hide();" />
+					<p:tooltip for="btnAgregarTelefono" value="Agregar Teléfono" />
+				</div>
+				<div style="width: 70%; height: 40px; margin: 30px auto;">
+					<p:commandButton value="Guardar Cambios"
+						action="#{inicioView.actualizarUsuario}"
+						oncomplete="PF('statusDialog').hide();PF('dlgPersonales').hide();"
+						update=":form:pnlPersonales" style="width:100%;"
+						onclick="PF('statusDialog').show();" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dlgInvitacion" widgetVar="dlgInvitacion" modal="true"
+			closeOnEscape="true" resizable="false" dynamic="true"
+			header="Invitación" showEffect="drop" hideEffect="drop">
+			<h:form id="formInv">
+				<p:panelGrid id="pnlInvitacion" styleClass="transparentBackground"
+					columns="1" style="text-align:center;">
+
+					<br />
+					<p:outputLabel
+						value="Invitado: #{inicioView.destinatario.nombre} #{inicioView.destinatario.APaterno}" />
+					<br />
+					<p:outputLabel
+						value="¿Confirma que desea enviar una invitación a esta persona?" />
+					<br />
+					<br />
+					<p:commandButton value="Enviar" update=":form:pnlDestinatarios"
+						onclick="PF('statusDialog').show();"
+						oncomplete="PF('statusDialog').hide();PF('dlgInvitacion').hide();"
+						action="#{inicioView.enviarInvitacion}" style="width:200px;height:70px;"/>
+
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dlgRevisionSen" widgetVar="dlgRevisionSen" modal="true"
+			closeOnEscape="true" resizable="false" dynamic="true"
+			header="Revisión de Sensores" showEffect="drop" hideEffect="drop">
+			<h:form id="formRev">
+				<p:panelGrid id="pnlRevision" styleClass="transparentBackground"
+					columns="1" style="text-align:center;">
+
+					<br />
+					<p:outputLabel
+						value="Vehiculo: #{inicioView.vehiculoDTO.marca.nombre}  #{inicioView.vehiculoDTO.modelo.nombre}" />
+					<br />
+					<p:outputLabel value="Placas:  #{inicioView.vehiculoDTO.placas}" />
+					<br />
+					<p:outputLabel
+						value="¿Confirma que desea enviar una solicitud de revisión de sensores a este vehículo?" />
+					<br />
+					<br />
+					<p:commandButton value="Enviar" style="width:200px;height:70px;"
+						onclick="PF('statusDialog').show();"
+						oncomplete="PF('statusDialog').hide();PF('dlgRevisionSen').hide();"
+						action="#{inicioView.revisarSensores}" />
+
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dlgHistorico" widgetVar="dlgHistorico" modal="true" position="top"
+			closeOnEscape="true" resizable="false" width="90%" dynamic="true" 
+			header="Histórico de mensajes de #{inicioView.vehiculoDTO.marca.nombre}  
+									#{inicioView.vehiculoDTO.modelo.nombre}"
+			showEffect="drop" hideEffect="drop">
+			<h:form id="formHist">
+				<p:panelGrid id="pnlHistorico" styleClass="transparentBackground"
+					 style="text-align:center;">
+					
+					<p:row>
+						<p:column>
+							<p:selectOneMenu id="console" value="#{inicioView.mes}" height="340"
+								style="width:125px;float:right" required="true" 
+											requiredMessage="Debe indicar el mes">
+								<f:selectItem itemLabel="Enero" itemValue="1" />
+								<f:selectItem itemLabel="Febrero" itemValue="2" />
+								<f:selectItem itemLabel="Marzo" itemValue="3" />
+								<f:selectItem itemLabel="Abril" itemValue="4" />
+								<f:selectItem itemLabel="Mayo" itemValue="5" />
+								<f:selectItem itemLabel="Junio" itemValue="6" />
+								<f:selectItem itemLabel="Julio" itemValue="7" />
+								<f:selectItem itemLabel="Agosto" itemValue="8" />
+								<f:selectItem itemLabel="Septiembre" itemValue="9" />
+								<f:selectItem itemLabel="Octubre" itemValue="10" />
+								<f:selectItem itemLabel="Noviembre" itemValue="11" />
+								<f:selectItem itemLabel="Diciembre" itemValue="12" />
+							</p:selectOneMenu>
+						</p:column>
+						<p:column width="30">
+							<p:selectOneMenu value="#{inicioView.anio}" required="true"
+									requiredMessage="Debe indicar el año" style="float:left;">
+								<f:selectItems value="#{inicioView.anios.entrySet()}" var="anio"
+										itemLabel="#{anio.value}" itemValue="#{anio.key}" />
+							</p:selectOneMenu>
+						</p:column>
+						<p:column>
+							<p:commandButton value="Buscar" style="width:150px;height:40px;float:left;"
+								onclick="PF('statusDialog').show();" update="pnlHistorico, dtHistorico"
+								oncomplete="PF('statusDialog').hide();" action="#{inicioView.obtenerHistoricoPorFecha}"/>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column colspan="3">
+							<p:dataTable id="dtHistorico" value="#{inicioView.mensajes}" emptyMessage="No hay mensajes registrados"
+									paginator="true" var="hist" rows="10" paginatorPosition="bottom" widgetVar="dtHistorico"
+									rowStyleClass="#{hist.idSubMensaje le 0 ? 'resaltarFila' : null}" filteredValue="#{inicioView.mensajesFiltrado}">
+								<f:facet name="header">Mensajes</f:facet>
+								<p:column headerText="Fecha" width="30%" style="font-size:14px;">
+									<p:outputLabel value="#{hist.fecha}" />
+								</p:column>
+								<p:column headerText="" style="font-size:14px;" width="10%">
+									<p:outputLabel value="#{hist.idSubMensaje le 1?'Recibido':'Enviado'}" />
+								</p:column>
+								<p:column headerText="Mensaje" style="font-size:14px;">
+									<p:outputLabel value="#{hist.mensaje}" />
+								</p:column>
+								<p:column headerText="Tipo" width="10%" style="font-size:14px;">
+									<p:outputLabel value="#{hist.tipoMensaje}" />
+								</p:column>
+								<p:column headerText="Subtipo" width="20%" style="font-size:14px;"
+														filterBy="#{hist.idSubMensaje}" filterMatchMode="exact">
+									<f:facet name="filter">
+                						<p:selectOneMenu onchange="PF('dtHistorico').filter();" >
+                							<f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
+                    						<f:selectItem itemLabel="Alarma" itemValue="0" />
+                    						<f:selectItem itemLabel="Informativo" itemValue="1" />
+                    						<f:selectItem itemLabel="Invitacion" itemValue="3" />
+                    						<f:selectItem itemLabel="Sensores" itemValue="4" />
+               							</p:selectOneMenu>
+            						</f:facet>
+									<p:outputLabel value="#{hist.tipoSubMensaje}" />
+								</p:column>
+							</p:dataTable>
+						</p:column>
+					</p:row>
+					
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog id="dlgEliminarVeh" widgetVar="dlgEliminarVeh" modal="true"
+			closeOnEscape="true" resizable="false" dynamic="true"
+			header="¡Cuidado!"
+			showEffect="blind" hideEffect="clip">
+			<h:form id="formEliminarVeh">
+				<p:panel id="pnlEliminarVeh">
+					<div align="center">
+						<p:outputLabel value="Vehículo: #{inicioView.vehiculoDTO.marca.nombre} #{inicioView.vehiculoDTO.modelo.nombre}" />
+						
+						<br />
+						<br />
+						
+						<p:outputLabel value="Placas: "  />
+						<p:outputLabel value="#{inicioView.vehiculoDTO.placas}" />
+						
+						<br />
+						<br />
+						<p:outputLabel value="¿Desea eliminar este vehículo?" />
+						<br />
+						<br />
+						<p:commandButton id="btnEliminarVeh" style="width:200px;height:70px;"
+							value="Eliminar" action="#{inicioView.eliminarVehiculo}"
+							onclick="PF('statusDialog').show();" update=":form:dtVehiculos, :form:dtDestinatarios"
+							oncomplete="PF('statusDialog').hide();PF('dlgEliminarVeh').hide();">
+						</p:commandButton>
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+			closable="false" resizable="false" showHeader="false">
+			<p:graphicImage
+				value="../imagenes/loading/ajax_loader_orange_256.gif" />
+			<br /><br />
+			<div style="margin: auto; width: 110px;">
+				<p:outputLabel value="CARGANDO..." style="font-weight:bold; font-size:20px;"/>
+			</div>
+		</p:dialog>
+
+	</div>
+</h:body>
+</html>
